@@ -18,13 +18,6 @@ public class MechanicDB {
         database.remove(mechanic);
     }
 
-    public Mechanic getFreeMechanic(){
-        for(int i=0;i<database.size();i++){
-            if(database.get(i).getIsWorking()==false)return database.get(i);
-        }
-        return null;
-    }
-
     public ArrayList<Mechanic> getDatabase() {
         return database;
     }

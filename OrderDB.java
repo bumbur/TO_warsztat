@@ -17,4 +17,11 @@ public class OrderDB {
     public ArrayList<Order> getDatabase() {
         return database;
     }
+
+    public Order getOrderByID(int id){
+        for(Order entry : database){
+            if(entry.getId()==id)return entry;
+        }
+        return null;
+    }
 }

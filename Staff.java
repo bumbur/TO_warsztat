@@ -8,35 +8,29 @@ import java.util.Map;
 public class Staff extends UserAbstract{
     private OrderDB orderDatabase;
     private MechanicDB mechanicDatabase;
-    private HashMap<Order,Mechanic> map;
+    private ClientDB clientsDatabase;
+    private HashMap<Order,Mechanic> assignedOrdersToMechanics;
 
-    public Staff(String name,String surname,OrderDB orderDatabase,MechanicDB mechanicDatabase) {
+    public Staff(String name, String surname, OrderDB orderDatabase, MechanicDB mechanicDatabase,
+                 ClientDB clientsDatabase, HashMap<Order, Mechanic> assignedOrdersToMechanics) {
         this.name=name;
         this.surname=surname;
         this.orderDatabase=orderDatabase;
         this.mechanicDatabase=mechanicDatabase;
-        this.map=new HashMap<Order,Mechanic>();
+        this.clientsDatabase = clientsDatabase;
+        this.assignedOrdersToMechanics = assignedOrdersToMechanics;
     }
 
-    public int setMechanicToOrder(Order order){
-        /*returns 0 if success
-        returns -1 if there is no available mechanics*/
-        orderDatabase.addOrder(order);
-        Mechanic mechanic=mechanicDatabase.getFreeMechanic();
-        if(mechanic==null)return -1;
-        mechanic.setIsWorking(true);
-        map.put(order,mechanic);
-        return 0;
+    public ArrayList<Mechanic> getMechanics(){
+        return mechanicDatabase.getDatabase();
     }
 
-    public ArrayList<Order> getOrdersForMechanic(Mechanic mechanic){
-        ArrayList<Order> orders=new ArrayList<Order>();
-
-        for(Map.Entry<Order,Mechanic> entry : map.entrySet()){
-            if(entry.getValue()==mechanic)orders.add(entry.getKey());
-        }
-
-        return orders;
+    public ArrayList<Order> getOrders(){
+        return orderDatabase.getDatabase();
     }
 
+    public void setMechanicToOrder(Order order,Mechanic mechanic){
+        order.setState(OrderState.IN_PROGRESS);
+        assignedOrdersToMechanics.put(order,mechanic);
+    }
 }
