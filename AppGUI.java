@@ -1,7 +1,10 @@
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -124,16 +127,65 @@ public class AppGUI {
         mechanicOrdersList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                //mechanic -> wybrano z listy orderow jakis order, wyswietlic jego szczegoly w polach obok
+                //mechanic -> wybrano z listy orderow jakis order, wyswietlic jego szczegoly w polach obok + jezeli ma okreslone to rowniez total price i co jest naprawiane odpowiednio ustawic
+            }
+        });
+
+        mechanicFixesTable.getModel().addTableModelListener(new TableModelListener() {
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                int column = e.getColumn();
+                int row = e.getFirstRow();
+                int price = (int)mechanicFixesTable.getValueAt(row,column-1);
+                String oldPriceString = mechanicTotalPriceTextField.getText();
+                int oldPrice;
+                if(oldPriceString.isEmpty()){
+                    oldPrice = 0;
+                } else {
+                    oldPrice = Integer.parseInt(oldPriceString);
+                }
+
+                int newPrice;
+
+                if((boolean)mechanicFixesTable.getValueAt(row,column)){
+                     newPrice = price + oldPrice;
+                } else {
+                    newPrice = oldPrice - price;
+                }
+                mechanicTotalPriceTextField.setText(String.valueOf(newPrice));
+            }
+        });
+        mechanicSavePriceButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //mechanic -> klikniecie w przycisk saveprice, pobiera cene z total price i zapisuje w zamowieniu.
+                // pobiera rowniez te checkboxy ktore sa zaznaczone i zapisuje w opisie zamowienia co i za ile jest naprawiane oraz jaki aktualnie ma stan
+            }
+        });
+        mechanicChangeStatusComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //mechanic -> zmieniono stan zamowienia, pobrac wybrany stan i zapisac w szczegolach zamowienia
+            }
+        });
+        clientNewOrderButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //client -> kliknieto New Order. Mozna sprawdzic czy wypelniono wszystkie dane, utworzyc nowe zamowienie z tymi danymi. Uzytkownikowi wyswietlic id tego zamowienia.
+                //nie wiem czy patryk tworzy to id jakos czy nie, w kazdym razie dzieki niemu bedzie mozna znalezc to zamowienie potem
+            }
+        });
+        clientCheckOrderButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //client -> kliknieto Check Order. Pobrac wpisany order ID, znalezc odpowiednie zamowienie. Jesli jest to pobrac jego dane i wyswietlic w odpowiednich polach.
             }
         });
     }
 
     private void createUIComponents() {
-        // TODO: place custom component creation code here
         /*
-        TUTAJ JEST PRZYKLADOWO ZROBIONE TWORZENIE COMBOBOXA, TRZEBA WZIAC BAZE WORKEROW I DODAC ICH DO LISTY
-        Z BAZY, A POTEM WRZUCIC DO COMBOBOXA.
+        TUTAJ JEST PRZYKLADOWO ZROBIONE TWORZENIE COMBOBOXA, TRZEBA WZIAC BAZE WORKEROW I DODAC ICH DO LISTY, dalem wektor bo wlasciwie na zwyklej liscie nie chcialo dzialac
          */
         Vector<String> workersList = new Vector<>();
         workersList.add("Worker 1");
@@ -141,48 +193,41 @@ public class AppGUI {
         staffWorkersComboBox = new JComboBox(workersList);
 
         /*
-        Tak samo jak wyzej, tutaj tez trzeba wrzucic workerow z bazy.
+        Tak samo jak wyzej, tutaj tez trzeba wrzucic workerow z bazy. W zasadzie jak wczytasz ich do workersList to ponizej nic nie musisz zmieniac.
          */
 
         mechanicSelectWorkerComboBox = new JComboBox(workersList);
 
         /*
-        tworzenie tabeli checkboxow w ktorej beda wszystkie dostepne w warsztacie naprawy
+        tworzenie tabeli w ktorej beda wszystkie dostepne w warsztacie naprawy, trzeba zmienić object rowdata tak aby wczytywala z bazy dostepnych napraw (nazwe i cene)
          */
 
-        TableModel dataModel = new AbstractTableModel() {
-            public int getColumnCount() { return 3; }
-            public int getRowCount() { return 100;}
-            public Object getValueAt(int row, int col) { return new Integer(row*col); }
+        Object rowData[][] = { { "Engine repair",100, Boolean.FALSE }, { "Tires change",200, Boolean.FALSE }, { "Nazwa 3",300, Boolean.FALSE },
+                { "Nazwa 4",400,Boolean.FALSE }, { "Nazwa 5",500,Boolean.FALSE }, };
+
+        String columnNames[] = { "Repair Name", "Price", "Add to order" };
+        TableModel dataModel = new DefaultTableModel(rowData,columnNames);
+        mechanicFixesTable = new JTable(dataModel){
+            @Override
+            public boolean isCellEditable(int row, int column)
+            {
+                if(column==0 || column==1)return false;
+                return true;
+            }
         };
-        mechanicFixesTable = new JTable(new AbstractTableModel() {
-
-            Object rowData[][] = { { "Engine repair",100, Boolean.FALSE }, { "2",200, Boolean.FALSE }, { "3",300, Boolean.FALSE },
-                    { "4",400,Boolean.FALSE }, { "5",500,Boolean.FALSE }, };
-
-            String columnNames[] = { "Repair Name", "Price", "Boolean" };
-
-            @Override
-            public int getRowCount() {
-                return rowData.length;
-            }
-
-            @Override
-            public int getColumnCount() {
-                return columnNames.length;
-            }
-
-            @Override
-            public Object getValueAt(int rowIndex, int columnIndex) {
-                return rowData[rowIndex][columnIndex];
-            }
-
-            public String getColumnName(int column) {
-                return columnNames[column];
-            }
-        });
-
         mechanicFixesTableScrollPane = new JScrollPane(mechanicFixesTable);
+        TableColumn tc = mechanicFixesTable.getColumnModel().getColumn(2);
+        tc.setCellEditor(mechanicFixesTable.getDefaultEditor(Boolean.class));
+        tc.setCellRenderer(mechanicFixesTable.getDefaultRenderer(Boolean.class));
+
+        /*
+        Tworzenie comboboxa z lista statusow. Trzeba zmienic aby wczytywalo z bazy dostepnych statusow.
+         */
+
+        Vector<String> statusList = new Vector<>();
+        statusList.add("Status 1");
+        statusList.add("Status 2");
+        mechanicChangeStatusComboBox = new JComboBox(statusList);
 
     }
 }
