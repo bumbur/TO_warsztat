@@ -12,11 +12,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentListener;
 import java.util.ArrayList;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 /**
  * Created by Przemek on 2016-05-09.
  */
 public class AppGUI {
+    static Logger log = Logger.getLogger(Logger.class.getName());
     //ON CREATION:
     OrderDB orderDB = new OrderDB();
     private JTabbedPane tabbedPane;
@@ -100,7 +102,6 @@ public class AppGUI {
     private JScrollPane clientRepairTextAreaScrollPane;
     private JScrollPane mechanicFixesTableScrollPane;
 
-
     public AppGUI() {
         staffAssignWorkerButton.addActionListener(new ActionListener() {
             @Override
@@ -111,6 +112,20 @@ public class AppGUI {
         staffOrdersList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
+                int selectedOrderId = Integer.parseInt(staffOrdersList.getSelectedValue().toString());
+                log.info("Selected order ID: " + selectedOrderId);
+                Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
+                //staffNameTextField.setText();
+                //staffSurnameTextField.setText();
+                //staffPhoneTextField.setText();
+                //staffEmailTextField.setText();
+
+                staffMakeTextField.setText(selectedOrder.getMark());
+                staffModelTextField.setText(selectedOrder.getModel());
+                staffProductionTextField.setText(selectedOrder.getYearOfCar());
+                staffMileageTextField.setText(selectedOrder.getMileage());
+                staffProblemTextArea.setText(selectedOrder.getDescription());
+
                 //staff tab -> wybranie elementu z listy order (wypelnij pola szczegolami z wybranego zamowienia)
             }
         });
