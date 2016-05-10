@@ -1,3 +1,4 @@
+import javax.print.attribute.standard.JobOriginatingUserName;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -8,6 +9,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentListener;
+import java.util.ArrayList;
 import java.util.Vector;
 
 /**
@@ -166,8 +169,10 @@ public class AppGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //client -> kliknieto New Order. Mozna sprawdzic czy wypelniono wszystkie dane, utworzyc nowe zamowienie z tymi danymi. Uzytkownikowi wyswietlic id tego zamowienia.
-                //nie wiem czy patryk tworzy to id jakos czy nie, w kazdym razie dzieki niemu bedzie mozna znalezc to zamowienie potem
+                //powinno zaktualizować listę Order'ów w zakładce Staff
+                // nie wiem czy patryk tworzy to id jakos czy nie, w kazdym razie dzieki niemu bedzie mozna znalezc to zamowienie potem
 
+                //Adding new order
                 Client client = new Client(
                         clientNameTextField.getText(),
                         clientSurnameTextField.getText(),
@@ -182,6 +187,17 @@ public class AppGUI {
                         clientMileageTextField.getText(),
                         clientProblemTextArea.getText());
                 JOptionPane.showMessageDialog(new JFrame(), "Write down your order ID: " + id);
+
+                //Updating orders in StaffPane
+                ArrayList<Order> orderList = orderDB.getDatabase();
+                System.out.print(orderList);
+                DefaultListModel<String> model = new DefaultListModel<>();
+
+                for(Order order : orderList){
+                    model.addElement(Integer.toString(order.getId()));
+                    System.out.print(model);
+                }
+                staffOrdersList.setModel(model);
             }
         });
 
