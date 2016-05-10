@@ -6,12 +6,12 @@ public class Client extends UserAbstract {
     private String phone;
     private OrderDB database;
 
-    public Client(String email, String name, String surname, String phone,OrderDB database) {
+    public Client(String name, String surname, String email, String phone, OrderDB database) {
+        this.name = name;
+        this.surname = surname;
         this.email = email;
         this.phone = phone;
-        this.name=name;
-        this.surname=surname;
-        this.database=database;
+        this.database = database;
     }
 
     public String getEmail() {
@@ -22,9 +22,10 @@ public class Client extends UserAbstract {
         return phone;
     }
 
-    public void addOrder(String mark, String model, String yearOfCar, String mileage, String description){
+    public int addOrder(String mark, String model, String yearOfCar, String mileage, String description){
         Order order=new Order(mark, model, yearOfCar, mileage, description);
         database.addOrder(order);
+        return order.getId();
     }
 
     public Order returnGivenOrder(int id){

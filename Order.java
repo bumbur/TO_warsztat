@@ -15,6 +15,10 @@ public class Order {
     private String yearOfCar;
     private String mileage;
     private String description;
+    private String repairDetails;
+
+
+
     private int cost;
     private HashMap<String,Integer> repairs;
 
@@ -41,6 +45,20 @@ public class Order {
         return state;
     }
 
+    public void setState(OrderState state) {
+        this.state = state;
+    }
+
+    public String getStatus() {
+        if (state == OrderState.ACCEPTED){
+            return "ACCEPTED";
+        } else if (state == OrderState.IN_PROGRESS) {
+            return "IN_PROGRESS";
+        } else {
+            return "DONE";
+        }
+    }
+
     public String getMark() {
         return mark;
     }
@@ -57,12 +75,12 @@ public class Order {
         return mileage;
     }
 
-    public String getDescription() {
-        return description;
+    public int getCost() {
+        return cost;
     }
 
-    public void setState(OrderState state) {
-        this.state = state;
+    public String getDescription() {
+        return description;
     }
 
     public void setRepairs(HashMap<String,Integer> repairs){
@@ -73,5 +91,11 @@ public class Order {
         for(Map.Entry<String,Integer> entry : repairs.entrySet()){
             this.cost+=entry.getValue();
         }
+    }
+    public void updateRepairDetails(String newDetails) {
+        repairDetails = repairDetails.concat(newDetails + "\n");
+    }
+    public String getRepairDetails() {
+        return mark + "\n" + model + "\n" + yearOfCar + "\n" + mileage + "\n" + description;
     }
 }

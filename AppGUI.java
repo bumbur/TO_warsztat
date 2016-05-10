@@ -14,6 +14,8 @@ import java.util.Vector;
  * Created by Przemek on 2016-05-09.
  */
 public class AppGUI {
+    //ON CREATION:
+    OrderDB orderDB = new OrderDB();
     private JTabbedPane tabbedPane;
     private JPanel mainJPanel;
     private JPanel staffPane;
@@ -95,15 +97,6 @@ public class AppGUI {
     private JScrollPane clientRepairTextAreaScrollPane;
     private JScrollPane mechanicFixesTableScrollPane;
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Warsztat Samochodowy GRAT");
-        frame.setContentPane(new AppGUI().mainJPanel);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000,600);
-        frame.setLocationRelativeTo(null);
-        //frame.pack();
-        frame.setVisible(true);
-    }
 
     public AppGUI() {
         staffAssignWorkerButton.addActionListener(new ActionListener() {
@@ -168,19 +161,53 @@ public class AppGUI {
                 //mechanic -> zmieniono stan zamowienia, pobrac wybrany stan i zapisac w szczegolach zamowienia
             }
         });
+
         clientNewOrderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //client -> kliknieto New Order. Mozna sprawdzic czy wypelniono wszystkie dane, utworzyc nowe zamowienie z tymi danymi. Uzytkownikowi wyswietlic id tego zamowienia.
                 //nie wiem czy patryk tworzy to id jakos czy nie, w kazdym razie dzieki niemu bedzie mozna znalezc to zamowienie potem
+
+                Client client = new Client(
+                        clientNameTextField.getText(),
+                        clientSurnameTextField.getText(),
+                        clientEmailLabel.getText(),
+                        clientPhoneLabel.getText(),
+                        orderDB);
+
+                int id = client.addOrder(
+                        clientMakeTextField.getText(),
+                        clientModelTextField.getText(),
+                        clientYearTextField.getText(),
+                        clientMileageTextField.getText(),
+                        clientProblemTextArea.getText());
+                JOptionPane.showMessageDialog(new JFrame(), "Write down your order ID: " + id);
             }
         });
+
         clientCheckOrderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //client -> kliknieto Check Order. Pobrac wpisany order ID, znalezc odpowiednie zamowienie. Jesli jest to pobrac jego dane i wyswietlic w odpowiednich polach.
+                Order order = orderDB.getOrderByID(Integer.parseInt(clientOrderIDTextField.getText()));
+                clientStatusTextField.setText(order.getStatus());
+                clientPriceTextField.setText(Integer.toString(order.getCost()));
+                clientRepairTextArea.setText(order.getRepairDetails());
             }
         });
+    }
+
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Warsztat Samochodowy GRAT");
+        frame.setContentPane(new AppGUI().mainJPanel);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1000,600);
+        frame.setLocationRelativeTo(null);
+        //frame.pack();
+        frame.setVisible(true);
+
+
+
     }
 
     private void createUIComponents() {
