@@ -22,13 +22,13 @@ public class Client extends UserAbstract {
         return phone;
     }
 
-    public int addOrder(String mark, String model, String yearOfCar, String mileage, String description){
-        Order order=new Order(mark, model, yearOfCar, mileage, description);
+    public int addOrder(String mark, String model, String yearOfCar, String mileage, String description, Client customer) {
+        Order order = new Order(mark, model, yearOfCar, mileage, description, customer);
         database.addOrder(order);
         return order.getId();
     }
 
-    public Order returnGivenOrder(int id){
+    public Order returnGivenOrder(int id) {
         return database.getOrderByID(id);
     }
 }

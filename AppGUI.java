@@ -106,19 +106,23 @@ public class AppGUI {
         staffAssignWorkerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                staffWorkersComboBox.getSelectedItem();
                 //staff tab -> klikniecie przycisku assign worker (przypisz wybrane zamowienie do wybranego z listy workera)
             }
         });
+
         staffOrdersList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 int selectedOrderId = Integer.parseInt(staffOrdersList.getSelectedValue().toString());
                 log.info("Selected order ID: " + selectedOrderId);
                 Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
-                //staffNameTextField.setText();
-                //staffSurnameTextField.setText();
-                //staffPhoneTextField.setText();
-                //staffEmailTextField.setText();
+                Client customer = selectedOrder.getCustomer();
+
+                staffNameTextField.setText(customer.getName());
+                staffSurnameTextField.setText(customer.getSurname());
+                staffPhoneTextField.setText(customer.getPhone());
+                staffEmailTextField.setText(customer.getEmail());
 
                 staffMakeTextField.setText(selectedOrder.getMark());
                 staffModelTextField.setText(selectedOrder.getModel());
@@ -129,6 +133,7 @@ public class AppGUI {
                 //staff tab -> wybranie elementu z listy order (wypelnij pola szczegolami z wybranego zamowienia)
             }
         });
+
         mechanicSelectWorkerComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -191,8 +196,8 @@ public class AppGUI {
                 Client client = new Client(
                         clientNameTextField.getText(),
                         clientSurnameTextField.getText(),
-                        clientEmailLabel.getText(),
-                        clientPhoneLabel.getText(),
+                        clientEmailTextField.getText(),
+                        clientPhoneTextField.getText(),
                         orderDB);
 
                 int id = client.addOrder(
@@ -200,7 +205,8 @@ public class AppGUI {
                         clientModelTextField.getText(),
                         clientYearTextField.getText(),
                         clientMileageTextField.getText(),
-                        clientProblemTextArea.getText());
+                        clientProblemTextArea.getText(),
+                        client);
                 JOptionPane.showMessageDialog(new JFrame(), "Write down your order ID: " + id);
 
                 //Updating orders in StaffPane
@@ -243,7 +249,8 @@ public class AppGUI {
 
     private void createUIComponents() {
         /*
-        TUTAJ JEST PRZYKLADOWO ZROBIONE TWORZENIE COMBOBOXA, TRZEBA WZIAC BAZE WORKEROW I DODAC ICH DO LISTY, dalem wektor bo wlasciwie na zwyklej liscie nie chcialo dzialac
+        TUTAJ JEST PRZYKLADOWO ZROBIONE TWORZENIE COMBOBOXA, TRZEBA WZIAC BAZE WORKEROW I DODAC ICH DO LISTY,
+        dalem wektor bo wlasciwie na zwyklej liscie nie chcialo dzialac
          */
         Vector<String> workersList = new Vector<>();
         workersList.add("Worker 1");

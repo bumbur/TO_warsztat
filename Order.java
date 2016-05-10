@@ -6,7 +6,7 @@ import java.util.Map;
  * Created by Patryk on 2016-05-08.
  */
 public class Order {
-    private static int counter=0;
+    private static int counter = 0;
     private int id;
     private Date dateStart;
     private OrderState state;
@@ -16,13 +16,13 @@ public class Order {
     private String mileage;
     private String description;
     private String repairDetails;
-
+    private Client customer;
 
 
     private int cost;
-    private HashMap<String,Integer> repairs;
+    private HashMap<String, Integer> repairs;
 
-    public Order(String mark, String model, String yearOfCar, String mileage, String description) {
+    public Order(String mark, String model, String yearOfCar, String mileage, String description, Client customer) {
         this.id = counter++;
         this.dateStart = new Date();
         this.state = OrderState.ACCEPTED;
@@ -31,6 +31,7 @@ public class Order {
         this.yearOfCar = yearOfCar;
         this.mileage = mileage;
         this.description = description;
+        this.customer = customer;
     }
 
     public int getId() {
@@ -50,7 +51,7 @@ public class Order {
     }
 
     public String getStatus() {
-        if (state == OrderState.ACCEPTED){
+        if (state == OrderState.ACCEPTED) {
             return "ACCEPTED";
         } else if (state == OrderState.IN_PROGRESS) {
             return "IN_PROGRESS";
@@ -61,6 +62,10 @@ public class Order {
 
     public String getMark() {
         return mark;
+    }
+
+    public Client getCustomer() {
+        return customer;
     }
 
     public String getModel() {
@@ -83,18 +88,20 @@ public class Order {
         return description;
     }
 
-    public void setRepairs(HashMap<String,Integer> repairs){
-        this.repairs=repairs;
+    public void setRepairs(HashMap<String, Integer> repairs) {
+        this.repairs = repairs;
     }
 
-    public void updateCost(){
-        for(Map.Entry<String,Integer> entry : repairs.entrySet()){
-            this.cost+=entry.getValue();
+    public void updateCost() {
+        for (Map.Entry<String, Integer> entry : repairs.entrySet()) {
+            this.cost += entry.getValue();
         }
     }
+
     public void updateRepairDetails(String newDetails) {
         repairDetails = repairDetails.concat(newDetails + "\n");
     }
+
     public String getRepairDetails() {
         return mark + "\n" + model + "\n" + yearOfCar + "\n" + mileage + "\n" + description;
     }
