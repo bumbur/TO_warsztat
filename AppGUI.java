@@ -1,4 +1,3 @@
-import javax.print.attribute.standard.JobOriginatingUserName;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -9,8 +8,8 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentListener;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.Vector;
 import java.util.logging.Logger;
 
@@ -286,12 +285,13 @@ public class AppGUI {
         tc.setCellRenderer(mechanicFixesTable.getDefaultRenderer(Boolean.class));
 
         /*
-        Tworzenie comboboxa z lista statusow. Trzeba zmienic aby wczytywalo z bazy dostepnych statusow.
+        Tworzenie comboboxa z lista statusow.
          */
 
         Vector<String> statusList = new Vector<>();
-        statusList.add("Status 1");
-        statusList.add("Status 2");
+        for(OrderState w : EnumSet.allOf(OrderState.class)) {
+            statusList.add(w.toString());
+        }
         mechanicChangeStatusComboBox = new JComboBox(statusList);
 
     }
