@@ -283,7 +283,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="9b52d" class="javax.swing.JList" binding="staffOrdersList">
+                  <component id="9b52d" class="javax.swing.JList" binding="staffOrdersList" custom-create="true">
                     <constraints/>
                     <properties/>
                   </component>

@@ -8,10 +8,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Vector;
+import java.util.*;
 
 public class AppGUI {
     //ON CREATION:
@@ -177,7 +174,6 @@ public class AppGUI {
                     mechanicProblemTextArea.setText(selectedOrder.getDescription());
                     mechanicTotalPriceTextField.setText(String.valueOf(selectedOrder.getCost()));
 
-                    //TODO mechanic -> co jest naprawiane odpowiednio ustawic
                 }
             }
         });
@@ -310,9 +306,9 @@ public class AppGUI {
     }
 
     private static void createSomeStuff() {
-        mechanicDB.addMechanic(new Mechanic("Popek", "Król", staff.getAssignedOrdersToMechanics()));
-        mechanicDB.addMechanic(new Mechanic("Andrzej", "Niedenerwujsie", staff.getAssignedOrdersToMechanics()));
-        mechanicDB.addMechanic(new Mechanic("Mateusz", "Wajcheprzełóż", staff.getAssignedOrdersToMechanics()));
+        mechanicDB.addMechanic(new Mechanic("Andrzej", "Klucz", staff.getAssignedOrdersToMechanics()));
+        mechanicDB.addMechanic(new Mechanic("Janusz", "Wiertarka", staff.getAssignedOrdersToMechanics()));
+        mechanicDB.addMechanic(new Mechanic("Jan", "Nowak", staff.getAssignedOrdersToMechanics()));
         Client c1 = new Client("Julek", "Kret", "ja@ja.ja", "123456", orderDB);
         c1.addOrder("Ford", "Mustang", "1978", "100k", "Do not start.", c1);
         c1.addOrder("Mercedes", "G", "1999", "20k", "Gearbox not shifting smooothly", c1);
@@ -360,5 +356,14 @@ public class AppGUI {
         }
         mechanicChangeStatusComboBox = new JComboBox<String>(statusList);
 
+        /**
+         * Creating list of orders for staff tab.
+         */
+
+        DefaultListModel<String> ordersListModel = new DefaultListModel<>();
+        staffOrdersList = new JList(ordersListModel);
+        for(Order order : orderDB.getDatabase()){
+            ordersListModel.addElement(String.valueOf(order.getId()));
+        }
     }
 }
