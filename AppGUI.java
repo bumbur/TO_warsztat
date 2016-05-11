@@ -207,6 +207,10 @@ public class AppGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //mechanic -> zmieniono stan zamowienia, pobrac wybrany stan i zapisac w szczegolach zamowienia
+                OrderState state = OrderState.valueOf(mechanicChangeStatusComboBox.getSelectedItem().toString());
+                int selectedOrderId = Integer.parseInt(mechanicOrdersList.getSelectedValue().toString());
+                Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
+                selectedOrder.setState(state);
             }
         });
 

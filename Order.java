@@ -51,13 +51,7 @@ public class Order {
     }
 
     public String getStatus() {
-        if (state == OrderState.ACCEPTED) {
-            return "ACCEPTED";
-        } else if (state == OrderState.IN_PROGRESS) {
-            return "IN_PROGRESS";
-        } else {
-            return "DONE";
-        }
+        return state.toString();
     }
 
     public String getMark() {
