@@ -14,7 +14,6 @@ public class Order {
     private String yearOfCar;
     private String mileage;
     private String description;
-    private String repairDetails;
     private Client customer;
 
 
