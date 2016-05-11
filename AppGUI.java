@@ -28,7 +28,7 @@ public class AppGUI {
     private JPanel staffPane;
     private JPanel mechanicPane;
     private JPanel clientPane;
-    private JList staffOrdersList;
+    private JList<String> staffOrdersList;
     private JTextArea staffProblemTextArea;
     private JTextField staffNameTextField;
     private JTextField staffPhoneTextField;
@@ -38,7 +38,7 @@ public class AppGUI {
     private JTextField staffProductionTextField;
     private JTextField staffMileageTextField;
     private JTextField staffMakeTextField;
-    private JComboBox staffWorkersComboBox;
+    private JComboBox<Mechanic> staffWorkersComboBox;
     private JButton staffAssignWorkerButton;
     private JLabel staffOrdersLabel;
     private JLabel staffNameLabel;
@@ -49,8 +49,8 @@ public class AppGUI {
     private JLabel staffModelLabel;
     private JLabel staffProductionLabel;
     private JLabel staffMileageLabel;
-    private JComboBox mechanicSelectWorkerComboBox;
-    private JList mechanicOrdersList;
+    private JComboBox<Mechanic> mechanicSelectWorkerComboBox;
+    private JList<String> mechanicOrdersList;
     private JTextField mechanicMakeTextField;
     private JTextField mechanicModelTextField;
     private JTextField mechanicYearTextField;
@@ -59,7 +59,7 @@ public class AppGUI {
     private JTable mechanicFixesTable;
     private JTextField mechanicTotalPriceTextField;
     private JButton mechanicSavePriceButton;
-    private JComboBox mechanicChangeStatusComboBox;
+    private JComboBox<String> mechanicChangeStatusComboBox;
     private JTextField clientNameTextField;
     private JTextField clientSurnameTextField;
     private JTextField clientEmailTextField;
@@ -108,7 +108,7 @@ public class AppGUI {
         staffAssignWorkerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Mechanic mechanic = (Mechanic) mechanicSelectWorkerComboBox.getSelectedItem();
+                Mechanic mechanic = (Mechanic) staffWorkersComboBox.getSelectedItem();
                 int selectedOrderId = Integer.parseInt(staffOrdersList.getSelectedValue().toString());
                 Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
 
@@ -153,8 +153,6 @@ public class AppGUI {
                     model.addElement(Integer.toString(order.getId()));
                 }
                 mechanicOrdersList.setModel(model);
-
-
             }
         });
 
@@ -293,8 +291,8 @@ public class AppGUI {
         ArrayList<Mechanic> mechanicList = mechanicDB.getDatabase();
         Vector<Mechanic> mech = new Vector<>(mechanicList);
 
-        staffWorkersComboBox = new JComboBox(mech);
-        mechanicSelectWorkerComboBox = new JComboBox(mech);
+        staffWorkersComboBox = new JComboBox<Mechanic>(mech);
+        mechanicSelectWorkerComboBox = new JComboBox<Mechanic>(mech);
 //        for(Mechanic mechanic : mechanicList){
 //            staffWorkersComboBox.addItem(mechanic.getName() + " " + mechanic.getSurname());
 //        }
@@ -331,7 +329,7 @@ public class AppGUI {
         for (OrderState w : EnumSet.allOf(OrderState.class)) {
             statusList.add(w.toString());
         }
-        mechanicChangeStatusComboBox = new JComboBox(statusList);
+        mechanicChangeStatusComboBox = new JComboBox<String>(statusList);
 
     }
 }
