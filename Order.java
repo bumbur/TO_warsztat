@@ -1,6 +1,5 @@
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Patryk on 2016-05-08.
@@ -32,6 +31,14 @@ public class Order {
         this.mileage = mileage;
         this.description = description;
         this.customer = customer;
+    }
+
+    public HashMap<String, Integer> getRepairs() {
+        return repairs;
+    }
+
+    public void setRepairs(HashMap<String, Integer> repairs) {
+        this.repairs = repairs;
     }
 
     public int getId() {
@@ -78,25 +85,11 @@ public class Order {
         return cost;
     }
 
+    public void setCost(int cost) {
+        this.cost = cost;
+    }
+
     public String getDescription() {
         return description;
-    }
-
-    public void setRepairs(HashMap<String, Integer> repairs) {
-        this.repairs = repairs;
-    }
-
-    public void updateCost() {
-        for (Map.Entry<String, Integer> entry : repairs.entrySet()) {
-            this.cost += entry.getValue();
-        }
-    }
-
-    public void updateRepairDetails(String newDetails) {
-        repairDetails = repairDetails.concat(newDetails + "\n");
-    }
-
-    public String getRepairDetails() {
-        return mark + "\n" + model + "\n" + yearOfCar + "\n" + mileage + "\n" + description;
     }
 }

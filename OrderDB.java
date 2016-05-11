@@ -7,7 +7,7 @@ public class OrderDB {
     private ArrayList<Order> database;
 
     public OrderDB() {
-        database= new ArrayList();
+        database = new ArrayList<Order>();
     }
 
     public void addOrder(Order order) {

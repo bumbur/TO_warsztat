@@ -10,15 +10,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Vector;
-import java.util.logging.Logger;
-
-/**
- * Created by Przemek on 2016-05-09.
- */
 
 public class AppGUI {
-    private static final Logger log = Logger.getLogger(Logger.class.getName());
     //ON CREATION:
     private static final OrderDB orderDB = new OrderDB();
     private static final MechanicDB mechanicDB = new MechanicDB();
@@ -105,24 +100,29 @@ public class AppGUI {
     private JScrollPane mechanicFixesTableScrollPane;
 
     public AppGUI() {
+        /**
+         * STAFF TAB
+         * On click button "Assign worker"
+         * Assigns Mechanic to Order.
+         */
         staffAssignWorkerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Mechanic mechanic = (Mechanic) staffWorkersComboBox.getSelectedItem();
                 int selectedOrderId = Integer.parseInt(staffOrdersList.getSelectedValue().toString());
                 Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
-
                 staff.setMechanicToOrder(selectedOrder, mechanic);
-
-                //staff tab -> klikniecie przycisku assign worker (przypisz wybrane zamowienie do wybranego z listy workera)
             }
         });
-
+        /**
+         * STAFF TAB
+         * On choose element from Orders list
+         * Shows orders details.
+         */
         staffOrdersList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 int selectedOrderId = Integer.parseInt(staffOrdersList.getSelectedValue().toString());
-                log.info("Selected order ID: " + selectedOrderId);
                 Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
                 Client customer = selectedOrder.getCustomer();
 
@@ -136,42 +136,55 @@ public class AppGUI {
                 staffProductionTextField.setText(selectedOrder.getYearOfCar());
                 staffMileageTextField.setText(selectedOrder.getMileage());
                 staffProblemTextArea.setText(selectedOrder.getDescription());
-
-                //staff tab -> wybranie elementu z listy order (wypelnij pola szczegolami z wybranego zamowienia)
             }
         });
-
+        /**
+         * MECHANIC TAB
+         * On choose Mechanic from ComboBox
+         * Shows unfinished Orders assigned to this Mechanic
+         */
         mechanicSelectWorkerComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //mechanic -> wybrano mechanika z comboboxa, dodać do listy pod comboboxem listę orderów dla tego mechanika. dać na czerwono te, które nie są skończone
                 Mechanic mechanic = (Mechanic) mechanicSelectWorkerComboBox.getSelectedItem();
                 ArrayList<Order> orderList = mechanic.getOrdersForMechanic();
                 DefaultListModel<String> model = new DefaultListModel<>();
 
                 for (Order order : orderList) {
-                    model.addElement(Integer.toString(order.getId()));
+                    if (order.getState() != OrderState.DONE) {
+                        model.addElement(Integer.toString(order.getId()));
+                    }
                 }
                 mechanicOrdersList.setModel(model);
             }
         });
-
+        /**
+         * MECHANIC TAB
+         * On choose Order from Order list
+         * Display Order Details
+         */
         mechanicOrdersList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                //mechanic -> wybrano z listy orderow jakis order, wyswietlic jego szczegoly w polach obok + jezeli ma okreslone to rowniez total price i co jest naprawiane odpowiednio ustawic
-                int selectedOrderId = Integer.parseInt(mechanicOrdersList.getSelectedValue().toString());
-                Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
+                if (mechanicOrdersList.getSelectedValue() != null) {
+                    int selectedOrderId = Integer.parseInt(mechanicOrdersList.getSelectedValue().toString());
+                    Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
 
-                mechanicMakeTextField.setText(selectedOrder.getMark());
-                mechanicModelTextField.setText(selectedOrder.getModel());
-                mechanicYearTextField.setText(selectedOrder.getYearOfCar());
-                mechanicMileageTextField.setText(selectedOrder.getMileage());
-                mechanicProblemTextArea.setText(selectedOrder.getDescription());
+                    mechanicMakeTextField.setText(selectedOrder.getMark());
+                    mechanicModelTextField.setText(selectedOrder.getModel());
+                    mechanicYearTextField.setText(selectedOrder.getYearOfCar());
+                    mechanicMileageTextField.setText(selectedOrder.getMileage());
+                    mechanicProblemTextArea.setText(selectedOrder.getDescription());
+                    mechanicTotalPriceTextField.setText(String.valueOf(selectedOrder.getCost()));
 
+                    //TODO mechanic -> co jest naprawiane odpowiednio ustawic
+                }
             }
         });
-
+        /**
+         * MECHANIC TAB
+         * Table with repairs.
+         */
         mechanicFixesTable.getModel().addTableModelListener(new TableModelListener() {
             @Override
             public void tableChanged(TableModelEvent e) {
@@ -196,31 +209,52 @@ public class AppGUI {
                 mechanicTotalPriceTextField.setText(String.valueOf(newPrice));
             }
         });
+        /**
+         * MECHANIC TAB
+         * On click "Save Price"
+         * Save Price and Repairs in Order details.
+         */
         mechanicSavePriceButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //mechanic -> klikniecie w przycisk saveprice, pobiera cene z total price i zapisuje w zamowieniu.
-                // pobiera rowniez te checkboxy ktore sa zaznaczone i zapisuje w opisie zamowienia co i za ile jest naprawiane oraz jaki aktualnie ma stan
+                int selectedOrderId = Integer.parseInt(mechanicOrdersList.getSelectedValue().toString());
+                Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
+                int price = Integer.parseInt(mechanicTotalPriceTextField.getText());
+                selectedOrder.setCost(price);
+
+                HashMap<String, Integer> repairs = new HashMap<String, Integer>();
+                for (int row = 0; row < mechanicFixesTable.getRowCount(); row++) {
+                    if ((boolean) mechanicFixesTable.getValueAt(row, 2)) {
+                        int cost = (int) mechanicFixesTable.getValueAt(row, 1);
+                        String work = mechanicFixesTable.getValueAt(row, 0).toString();
+                        repairs.put(work, cost);
+                    }
+                }
+                selectedOrder.setRepairs(repairs);
             }
         });
+        /**
+         * MECHANIC TAB
+         * On OrderState change - changes OrderState.
+         */
         mechanicChangeStatusComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //mechanic -> zmieniono stan zamowienia, pobrac wybrany stan i zapisac w szczegolach zamowienia
                 OrderState state = OrderState.valueOf(mechanicChangeStatusComboBox.getSelectedItem().toString());
                 int selectedOrderId = Integer.parseInt(mechanicOrdersList.getSelectedValue().toString());
                 Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
                 selectedOrder.setState(state);
             }
         });
-
+        /**
+         * CLIENT TAB
+         * On click "New Order"
+         * Create new Order with provided details.
+         * Refreshes Orders list in staff tab.
+         */
         clientNewOrderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //client -> kliknieto New Order. Mozna sprawdzic czy wypelniono wszystkie dane, utworzyc nowe zamowienie z tymi danymi. Uzytkownikowi wyswietlic id tego zamowienia.
-                //powinno zaktualizować listę Order'ów w zakładce Staff
-                // nie wiem czy patryk tworzy to id jakos czy nie, w kazdym razie dzieki niemu bedzie mozna znalezc to zamowienie potem
-
                 //Adding new order
                 Client client = new Client(
                         clientNameTextField.getText(),
@@ -248,15 +282,18 @@ public class AppGUI {
                 staffOrdersList.setModel(model);
             }
         });
-
+        /**
+         * CLIENT TAB
+         * On click "Chceck Order"
+         * Return info fo order with provided ID
+         */
         clientCheckOrderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //client -> kliknieto Check Order. Pobrac wpisany order ID, znalezc odpowiednie zamowienie. Jesli jest to pobrac jego dane i wyswietlic w odpowiednich polach.
                 Order order = orderDB.getOrderByID(Integer.parseInt(clientOrderIDTextField.getText()));
                 clientStatusTextField.setText(order.getStatus());
                 clientPriceTextField.setText(Integer.toString(order.getCost()));
-                clientRepairTextArea.setText(order.getRepairDetails());
+                clientRepairTextArea.setText(order.getRepairs().toString());
             }
         });
     }
@@ -273,7 +310,6 @@ public class AppGUI {
     }
 
     private static void createSomeStuff() {
-        //MechanicDB mechanicDB = new MechanicDB();
         mechanicDB.addMechanic(new Mechanic("Popek", "Król", staff.getAssignedOrdersToMechanics()));
         mechanicDB.addMechanic(new Mechanic("Andrzej", "Niedenerwujsie", staff.getAssignedOrdersToMechanics()));
         mechanicDB.addMechanic(new Mechanic("Mateusz", "Wajcheprzełóż", staff.getAssignedOrdersToMechanics()));
@@ -286,12 +322,6 @@ public class AppGUI {
     }
 
     private void createUIComponents() {
-        /*
-        TUTAJ JEST PRZYKLADOWO ZROBIONE TWORZENIE COMBOBOXA, TRZEBA WZIAC BAZE WORKEROW I DODAC ICH DO LISTY,
-        dalem wektor bo wlasciwie na zwyklej liscie nie chcialo dzialac
-         */
-
-
         ArrayList<Mechanic> mechanicList = mechanicDB.getDatabase();
         Vector<Mechanic> mech = new Vector<>(mechanicList);
 
@@ -300,10 +330,6 @@ public class AppGUI {
 //        for(Mechanic mechanic : mechanicList){
 //            staffWorkersComboBox.addItem(mechanic.getName() + " " + mechanic.getSurname());
 //        }
-
-        /*
-        tworzenie tabeli w ktorej beda wszystkie dostepne w warsztacie naprawy, trzeba zmienić object rowdata tak aby wczytywala z bazy dostepnych napraw (nazwe i cene)
-         */
 
         Object rowData[][] = {{"Engine repair", 600, Boolean.FALSE},
                 {"Tires change", 200, Boolean.FALSE},
@@ -325,10 +351,9 @@ public class AppGUI {
         tc.setCellEditor(mechanicFixesTable.getDefaultEditor(Boolean.class));
         tc.setCellRenderer(mechanicFixesTable.getDefaultRenderer(Boolean.class));
 
-        /*
-        Tworzenie comboboxa z lista statusow.
+        /**
+         * Creating combox with status list.
          */
-
         Vector<String> statusList = new Vector<>();
         for (OrderState w : EnumSet.allOf(OrderState.class)) {
             statusList.add(w.toString());

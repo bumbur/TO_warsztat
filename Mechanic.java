@@ -21,10 +21,6 @@ public class Mechanic extends UserAbstract {
         order.setRepairs(repairs);
     }
 
-    public void updateCostOfOrder(Order order) {
-        order.updateCost();
-    }
-
     public void endOrder(Order order) {
         order.setState(OrderState.DONE);
     }
