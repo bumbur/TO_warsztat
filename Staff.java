@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Patryk on 2016-05-08.
@@ -8,17 +7,17 @@ import java.util.Map;
 public class Staff extends UserAbstract{
     private OrderDB orderDatabase;
     private MechanicDB mechanicDatabase;
-    private ClientDB clientsDatabase;
-    private HashMap<Order,Mechanic> assignedOrdersToMechanics;
+    private HashMap<Order,Mechanic> assignedOrdersToMechanics = new HashMap<>();
 
-    public Staff(String name, String surname, OrderDB orderDatabase, MechanicDB mechanicDatabase,
-                 ClientDB clientsDatabase, HashMap<Order, Mechanic> assignedOrdersToMechanics) {
+    public Staff(String name, String surname, OrderDB orderDatabase, MechanicDB mechanicDatabase) {
         this.name=name;
         this.surname=surname;
         this.orderDatabase=orderDatabase;
         this.mechanicDatabase=mechanicDatabase;
-        this.clientsDatabase = clientsDatabase;
-        this.assignedOrdersToMechanics = assignedOrdersToMechanics;
+    }
+
+    public HashMap<Order, Mechanic> getAssignedOrdersToMechanics() {
+        return assignedOrdersToMechanics;
     }
 
     public ArrayList<Mechanic> getMechanics(){

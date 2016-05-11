@@ -16,10 +16,13 @@ import java.util.logging.Logger;
 /**
  * Created by Przemek on 2016-05-09.
  */
+
 public class AppGUI {
-    static Logger log = Logger.getLogger(Logger.class.getName());
+    private static final Logger log = Logger.getLogger(Logger.class.getName());
     //ON CREATION:
-    OrderDB orderDB = new OrderDB();
+    private static final OrderDB orderDB = new OrderDB();
+    private static final MechanicDB mechanicDB = new MechanicDB();
+    private static Staff staff = new Staff("Pan", "Kierownik", orderDB, mechanicDB);
     private JTabbedPane tabbedPane;
     private JPanel mainJPanel;
     private JPanel staffPane;
@@ -105,7 +108,12 @@ public class AppGUI {
         staffAssignWorkerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                staffWorkersComboBox.getSelectedItem();
+                Mechanic mechanic = (Mechanic) mechanicSelectWorkerComboBox.getSelectedItem();
+                int selectedOrderId = Integer.parseInt(staffOrdersList.getSelectedValue().toString());
+                Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
+
+                staff.setMechanicToOrder(selectedOrder, mechanic);
+
                 //staff tab -> klikniecie przycisku assign worker (przypisz wybrane zamowienie do wybranego z listy workera)
             }
         });
@@ -137,12 +145,32 @@ public class AppGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //mechanic -> wybrano mechanika z comboboxa, dodać do listy pod comboboxem listę orderów dla tego mechanika. dać na czerwono te, które nie są skończone
+                Mechanic mechanic = (Mechanic) mechanicSelectWorkerComboBox.getSelectedItem();
+                ArrayList<Order> orderList = mechanic.getOrdersForMechanic();
+                DefaultListModel<String> model = new DefaultListModel<>();
+
+                for (Order order : orderList) {
+                    model.addElement(Integer.toString(order.getId()));
+                }
+                mechanicOrdersList.setModel(model);
+
+
             }
         });
+
         mechanicOrdersList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
                 //mechanic -> wybrano z listy orderow jakis order, wyswietlic jego szczegoly w polach obok + jezeli ma okreslone to rowniez total price i co jest naprawiane odpowiednio ustawic
+                int selectedOrderId = Integer.parseInt(mechanicOrdersList.getSelectedValue().toString());
+                Order selectedOrder = orderDB.getOrderByID(selectedOrderId);
+
+                mechanicMakeTextField.setText(selectedOrder.getMark());
+                mechanicModelTextField.setText(selectedOrder.getModel());
+                mechanicYearTextField.setText(selectedOrder.getYearOfCar());
+                mechanicMileageTextField.setText(selectedOrder.getMileage());
+                mechanicProblemTextArea.setText(selectedOrder.getDescription());
+
             }
         });
 
@@ -151,10 +179,10 @@ public class AppGUI {
             public void tableChanged(TableModelEvent e) {
                 int column = e.getColumn();
                 int row = e.getFirstRow();
-                int price = (int)mechanicFixesTable.getValueAt(row,column-1);
+                int price = (int) mechanicFixesTable.getValueAt(row, column - 1);
                 String oldPriceString = mechanicTotalPriceTextField.getText();
                 int oldPrice;
-                if(oldPriceString.isEmpty()){
+                if (oldPriceString.isEmpty()) {
                     oldPrice = 0;
                 } else {
                     oldPrice = Integer.parseInt(oldPriceString);
@@ -162,8 +190,8 @@ public class AppGUI {
 
                 int newPrice;
 
-                if((boolean)mechanicFixesTable.getValueAt(row,column)){
-                     newPrice = price + oldPrice;
+                if ((boolean) mechanicFixesTable.getValueAt(row, column)) {
+                    newPrice = price + oldPrice;
                 } else {
                     newPrice = oldPrice - price;
                 }
@@ -210,12 +238,10 @@ public class AppGUI {
 
                 //Updating orders in StaffPane
                 ArrayList<Order> orderList = orderDB.getDatabase();
-                System.out.print(orderList);
                 DefaultListModel<String> model = new DefaultListModel<>();
 
-                for(Order order : orderList){
+                for (Order order : orderList) {
                     model.addElement(Integer.toString(order.getId()));
-                    System.out.print(model);
                 }
                 staffOrdersList.setModel(model);
             }
@@ -234,16 +260,27 @@ public class AppGUI {
     }
 
     public static void main(String[] args) {
+        createSomeStuff();
         JFrame frame = new JFrame("Warsztat Samochodowy GRAT");
         frame.setContentPane(new AppGUI().mainJPanel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1000,600);
+        frame.setSize(1000, 600);
         frame.setLocationRelativeTo(null);
         //frame.pack();
         frame.setVisible(true);
+    }
 
-
-
+    private static void createSomeStuff() {
+        //MechanicDB mechanicDB = new MechanicDB();
+        mechanicDB.addMechanic(new Mechanic("Popek", "Król", staff.getAssignedOrdersToMechanics()));
+        mechanicDB.addMechanic(new Mechanic("Andrzej", "Niedenerwujsie", staff.getAssignedOrdersToMechanics()));
+        mechanicDB.addMechanic(new Mechanic("Mateusz", "Wajcheprzełóż", staff.getAssignedOrdersToMechanics()));
+        Client c1 = new Client("Julek", "Kret", "ja@ja.ja", "123456", orderDB);
+        c1.addOrder("Ford", "Mustang", "1978", "100k", "Do not start.", c1);
+        c1.addOrder("Mercedes", "G", "1999", "20k", "Gearbox not shifting smooothly", c1);
+        c1.addOrder("Bugatti", "Veyron", "2015", "40k", "Engine controll shows.", c1);
+        Client c2 = new Client("Wojtek", "Marek", "ja@xd.lol", "6732623", orderDB);
+        c2.addOrder("Ford", "Transit", "2005", "200k", "Damaged", c2);
     }
 
     private void createUIComponents() {
@@ -251,31 +288,33 @@ public class AppGUI {
         TUTAJ JEST PRZYKLADOWO ZROBIONE TWORZENIE COMBOBOXA, TRZEBA WZIAC BAZE WORKEROW I DODAC ICH DO LISTY,
         dalem wektor bo wlasciwie na zwyklej liscie nie chcialo dzialac
          */
-        Vector<String> workersList = new Vector<>();
-        workersList.add("Worker 1");
-        workersList.add("Worker 2");
-        staffWorkersComboBox = new JComboBox(workersList);
 
-        /*
-        Tak samo jak wyzej, tutaj tez trzeba wrzucic workerow z bazy. W zasadzie jak wczytasz ich do workersList to ponizej nic nie musisz zmieniac.
-         */
 
-        mechanicSelectWorkerComboBox = new JComboBox(workersList);
+        ArrayList<Mechanic> mechanicList = mechanicDB.getDatabase();
+        Vector<Mechanic> mech = new Vector<>(mechanicList);
+
+        staffWorkersComboBox = new JComboBox(mech);
+        mechanicSelectWorkerComboBox = new JComboBox(mech);
+//        for(Mechanic mechanic : mechanicList){
+//            staffWorkersComboBox.addItem(mechanic.getName() + " " + mechanic.getSurname());
+//        }
 
         /*
         tworzenie tabeli w ktorej beda wszystkie dostepne w warsztacie naprawy, trzeba zmienić object rowdata tak aby wczytywala z bazy dostepnych napraw (nazwe i cene)
          */
 
-        Object rowData[][] = { { "Engine repair",100, Boolean.FALSE }, { "Tires change",200, Boolean.FALSE }, { "Nazwa 3",300, Boolean.FALSE },
-                { "Nazwa 4",400,Boolean.FALSE }, { "Nazwa 5",500,Boolean.FALSE }, };
+        Object rowData[][] = {{"Engine repair", 600, Boolean.FALSE},
+                {"Tires change", 200, Boolean.FALSE},
+                {"Oil replacement", 300, Boolean.FALSE},
+                {"Gearbox repair", 400, Boolean.FALSE},
+                {"AC refreshment", 100, Boolean.FALSE},};
 
-        String columnNames[] = { "Repair Name", "Price", "Add to order" };
-        TableModel dataModel = new DefaultTableModel(rowData,columnNames);
-        mechanicFixesTable = new JTable(dataModel){
+        String columnNames[] = {"Repair Name", "Price", "Add to order"};
+        TableModel dataModel = new DefaultTableModel(rowData, columnNames);
+        mechanicFixesTable = new JTable(dataModel) {
             @Override
-            public boolean isCellEditable(int row, int column)
-            {
-                if(column==0 || column==1)return false;
+            public boolean isCellEditable(int row, int column) {
+                if (column == 0 || column == 1) return false;
                 return true;
             }
         };
@@ -289,7 +328,7 @@ public class AppGUI {
          */
 
         Vector<String> statusList = new Vector<>();
-        for(OrderState w : EnumSet.allOf(OrderState.class)) {
+        for (OrderState w : EnumSet.allOf(OrderState.class)) {
             statusList.add(w.toString());
         }
         mechanicChangeStatusComboBox = new JComboBox(statusList);
