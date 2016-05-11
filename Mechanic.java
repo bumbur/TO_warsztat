@@ -37,4 +37,9 @@ public class Mechanic extends UserAbstract {
     public HashMap<String, Integer> getRepairs() {
         return repairs;
     }
+
+    @Override
+    public String toString(){
+    	return getName() + " " + getSurname();
+    }
 }
