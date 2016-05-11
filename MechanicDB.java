@@ -7,14 +7,14 @@ public class MechanicDB {
     private ArrayList<Mechanic> database;
 
     public MechanicDB() {
-        database= new ArrayList();
+        database = new ArrayList<Mechanic>();
     }
 
     public void addMechanic(Mechanic mechanic) {
         database.add(mechanic);
     }
 
-    public void deleteMechanic(Mechanic mechanic){
+    public void deleteMechanic(Mechanic mechanic) {
         database.remove(mechanic);
     }
 

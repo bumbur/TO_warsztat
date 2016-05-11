@@ -2,8 +2,8 @@
  * Created by Patryk on 2016-05-08.
  */
 public abstract class UserAbstract implements User{
-    String name;
-    String surname;
+    protected String name;
+    protected String surname;
 
     public String getName() {
         return name;
